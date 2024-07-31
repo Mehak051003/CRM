@@ -20,7 +20,7 @@ $result = $conn->query($query);
         flex-direction: column;
         align-items: center;
         margin: 20px auto;
-        width: 2900px;
+        width: 3000px;
     }
 
     .main-content {
@@ -30,7 +30,11 @@ $result = $conn->query($query);
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         border-radius: 8px;
     }
-
+    .main-content {
+            margin-left: 120px;
+            margin-top: 60px;
+            padding: 20px;
+        }
     table {
         width: 2700px;
         border-collapse: collapse;

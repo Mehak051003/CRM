@@ -7,17 +7,20 @@ if (!isset($_SESSION['user']) || $_SESSION['role'] != 'admin') {
     exit();
 }
 
+$message = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-    $serial_number = $_POST['serial_number'];
+    // Generate reference number
+    date_default_timezone_set('Asia/Kolkata');
+    $reference_number = '#' . date('dmHis'); 
+
     $firstname = $_POST['firstname'];
     $lastname = $_POST['lastname'];
     $email = $_POST['email'];
     $country = $_POST['country'];
 
-    
     $stmt = $conn->prepare("INSERT INTO clients (serial_number, firstname, lastname, email, country) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssss", $serial_number, $firstname, $lastname, $email, $country);
+    $stmt->bind_param("sssss", $reference_number, $firstname, $lastname, $email, $country);
 
     if ($stmt->execute()) {
         $message = "Client added successfully!";
@@ -40,8 +43,7 @@ if ($clientResult) {
     $message = "Error fetching clients: " . $conn->error;
 }
 
-$conn->close(); 
-
+$conn->close();
 ?>
 
 <?php include 'header.php'; ?>
@@ -53,12 +55,13 @@ $conn->close();
     }
 
     .container {
-        max-width: 800px;
+        max-width: 1000px;
         margin: 20px auto;
         padding: 20px;
         background-color: #fff;
         border-radius: 8px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        margin-left: 250px;
     }
 
     .container h2 {
@@ -136,9 +139,13 @@ $conn->close();
         text-align: center;
         margin: 10px 0;
         padding: 10px;
-        background-color: #e74c3c;
         color: #fff;
         border-radius: 4px;
+    }
+    .main-content {
+        margin-left: 120px;
+        margin-top: 60px;
+        padding: 20px;
     }
 </style>
 
@@ -147,9 +154,6 @@ $conn->close();
     <div class="form-container">
         <?php if (isset($message)) echo "<p class='message'>$message</p>"; ?>
         <form method="post" action="addclient.php">
-            <label for="serial_number">Reference Number:</label>
-            <input type="text" id="serial_number" name="serial_number" required>
-
             <label for="firstname">First Name:</label>
             <input type="text" id="firstname" name="firstname" required>
 

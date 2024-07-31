@@ -1,3 +1,22 @@
+<?php
+
+// session_start(); 
+
+include '../includes/daily_reset.php'; 
+include '../includes/db_connect.php'; 
+
+
+$user_id = $_SESSION['user_id']; 
+
+$query = $conn->prepare("SELECT image FROM users WHERE id = ?");
+$query->bind_param("i", $user_id);
+$query->execute();
+$result = $query->get_result();
+$user = $result->fetch_assoc();
+$image = $user['image']; 
+$query->close();
+
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -116,11 +135,27 @@
         .sub-menu a:hover {
             background-color: #2c3e50;
         }
+        .menu {
+            display: none;
+            padding-left: 20px;
+            background-color: #34495e;
+        }
+
+        .menu a {
+            display: block;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+        }
+
+        .menu a:hover {
+            background-color: #2c3e50;
+        }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
-            $('.projects-toggle').click(function(e) {
+            $('.reports-toggle').click(function(e) {
                 e.preventDefault();
                 $('.sub-menu').slideToggle();
             });
@@ -128,31 +163,27 @@
     </script>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">Admin Panel</div>
-        <div class="profile">
-            <img src="../uploads/download.png" alt="Profile Picture">
-            <div class="dropdown">
-                <a href="myaccount.php">My Account</a>
-                <a href="editprofile.php">Edit Profile</a>
-                <a href="logout.php">Logout</a>
-            </div>
+<div class="header">
+    <div class="logo">HR Panel</div>
+    <div class="profile">
+        <img src="../uploads/<?php echo htmlspecialchars($image); ?>" alt="Profile Picture">
+        <div class="dropdown">
+            <a href="myaccount.php">My Account</a>
+            <a href="editprofile.php">Edit Profile</a>
+            <a href="logout.php">Logout</a>
         </div>
     </div>
-    <div class="sidebar">
-        <a href="dashboard.php">Dashboard</a>
-        <a href="adduser.php">Add User</a>
-        <a href="addclient.php">Clients</a>
-        <a href="reports.php">Reports</a>
-        <a href="permission.php">Time in Permission</a>
-        <a class="projects-toggle" href="#">Projects</a>
-        <div class="sub-menu">
-            <a href="project.php">Add Project</a>
-            <a href="projectview.php">View Projects</a>
-        </div>
-        <a href="policy.php">Policies</a>
-        <a href="holidays.php">Holidays</a>
+</div>
+<div class="sidebar">
+    <a href="dashboard.php">Dashboard</a>
+    <a class="reports-toggle" href="#">Reports</a>
+    <div class="sub-menu">
+        <a href="morning.php">Morning Status Report</a>
+        <a href="evening.php">Evening Status Report</a>
     </div>
-    <div class="main-content">
-        <!-- Page content goes here -->
-
+    <a href="leave.php">Leaves Requests</a>
+    <a href="permission.php">Time in Permission</a>
+    <a href="policy.php">Policies</a>
+    <a href="holidays.php">Holidays</a>
+</div>
+<div class="main-content">

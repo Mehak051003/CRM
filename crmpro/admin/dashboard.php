@@ -2,16 +2,14 @@
 session_start();
 include '../includes/db_connect.php';
 
-date_default_timezone_set('Asia/Kolkata');
-
 if (!isset($_SESSION['user']) || $_SESSION['role'] != 'admin') {
     header('Location: ../login.php');
     exit();
 }
 
+// Fetch user details
 $email = $_SESSION['user'];
 $message = '';
-
 $stmt = $conn->prepare("SELECT name, email FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
@@ -19,37 +17,21 @@ $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 $stmt->close();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['timein'])) {
-    $current_date = date('Y-m-d');
-    $current_time = date('Y-m-d H:i:s');
+$name = isset($user['name']) ? htmlspecialchars($user['name']) : 'Name not found';
+$email = isset($user['email']) ? htmlspecialchars($user['email']) : 'Email not found';
 
-    error_log("Current Date: $current_date");
-    error_log("Current Time: $current_time");
 
-    $query = "SELECT * FROM timein WHERE email = ? AND timein_date = ?";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param('ss', $email, $current_date);
-    $stmt->execute();
-    $result = $stmt->get_result();
+// Fetch all users, team leaders, and project managers
+$userQuery = "SELECT name, email, role, designation FROM users WHERE role != 'admin'";
+$userResult = $conn->query($userQuery);
 
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $message = "You have already timed in today at " . date('H:i:s', strtotime($row['timein_time'])) . ".";
-    } else {
-        $insert_query = "INSERT INTO timein (email, timein_time, timein_date) VALUES (?, ?, ?)";
-        $insert_stmt = $conn->prepare($insert_query);
-        $insert_stmt->bind_param('sss', $email, $current_time, $current_date);
-
-        if ($insert_stmt->execute()) {
-            $message = "Time in recorded successfully at " . date('H:i:s', strtotime($current_time)) . ".";
-        } else {
-            $message = "Error recording time in: " . $conn->error;
-        }
-
-        $insert_stmt->close();
+$users = [];
+if ($userResult) {
+    while ($row = $userResult->fetch_assoc()) {
+        $users[] = $row;
     }
-
-    $stmt->close();
+} else {
+    $message = "Error fetching users: " . $conn->error;
 }
 
 $conn->close();
@@ -58,25 +40,15 @@ $conn->close();
 <?php include 'header.php'; ?>
 
 <style>
-    .time-in-button {
-        padding: 10px 20px;
-        background-color: #3498db;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        position: absolute;
-        top: 20px;
-        right: 20px;
-    }
 
     .time-in-button:hover {
         background-color: #2980b9;
     }
 
-    .profile {
-        text-align: center;
-        margin-top: 80px;
+    .main-content {
+        margin-left: 120px;
+        margin-top: 30px;
+        padding: 20px;
     }
 
     .message {
@@ -84,19 +56,72 @@ $conn->close();
         color: #28a745;
         font-weight: bold;
     }
+
+    .user-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .user-table th, .user-table td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: left;
+    }
+
+    .user-table th {
+        background-color: #f2f2f2;
+    }
+
+    .user-info-box {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        margin-top: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .user-info-box p {
+        margin: 0;
+        padding: 5px 0;
+    }
 </style>
 
 <?php if ($message): ?>
     <p class="message"><?php echo $message; ?></p>
 <?php endif; ?>
 
-<form action="" method="post">
-    <button type="submit" name="timein" class="time-in-button">Time In</button>
-</form>
 
-<div class="profile">
-    <h2><?php echo "Name: " . $user['name']; ?></h2>
-    <p><?php echo "Email: " . $user['email']; ?></p>
+
+<div class="main-content">
+    <div class="user-info-box">
+        <p><strong>Name:</strong> <?php echo htmlspecialchars($name); ?></p>
+        <p><strong>Email:</strong> <?php echo htmlspecialchars($email); ?></p>
+    </div>
+
+    <br>
+    <h2>All Employees</h2>
+    <table class="user-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Designation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($users as $user): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($user['name']); ?></td>
+                    <td><?php echo htmlspecialchars($user['email']); ?></td>
+                    <td><?php echo htmlspecialchars($user['role']); ?></td>
+                    <td><?php echo htmlspecialchars($user['designation']); ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
 </div>
 
 <?php include 'footer.php'; ?>

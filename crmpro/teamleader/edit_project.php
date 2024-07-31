@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 include '../includes/db_connect.php';
@@ -84,12 +83,15 @@ $stmt->close();
         }
 
         .main-content {
-            max-width: 800px;
+            max-width: 2000px;
             margin: 20px auto;
             padding: 20px;
             background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-left: 120px;
+            margin-top: 60px;
+            padding: 20px;
         }
 
         h2 {

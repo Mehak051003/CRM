@@ -85,6 +85,7 @@ $conn->close();
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         width: 80%;
         margin: auto;
+        margin-left:200px;
     }
 
     .form-container h2 {
@@ -127,6 +128,11 @@ $conn->close();
         margin: 20px 0;
         text-align: center;
     }
+    .main-content {
+            margin-left: 120px;
+            margin-top: 60px;
+            padding: 20px;
+        }
 </style>
 
 <div class="form-container">

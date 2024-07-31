@@ -50,6 +50,11 @@ $conn->close();
     th {
         background-color: #f2f2f2;
     }
+    .main-content{
+        margin-left: 120px;
+            margin-top: 60px;
+            padding: 20px;
+    }
 </style>
 
 <div class="container">

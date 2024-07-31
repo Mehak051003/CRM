@@ -108,7 +108,7 @@ $conn->close();
 <?php include 'header.php'; ?>
 
 <style>
-    .time-in-button {
+   .time-in-button {
         padding: 10px 20px;
         background-color: #3498db;
         color: white;
@@ -116,18 +116,23 @@ $conn->close();
         border-radius: 4px;
         cursor: pointer;
         position: absolute;
-        top: 20px;
-        right: 20px;
-        transition: background-color 0.3s ease;
+        top: 100px;
+        left: 275px;
     }
 
     .time-in-button:hover {
         background-color: #2980b9;
     }
 
-    .profile {
+    .main-content {
+            margin-left: 120px;
+            margin-top: 60px;
+            padding: 20px;
+        }
+    .message {
         text-align: center;
-        margin-top: 80px;
+        color: #28a745;
+        font-weight: bold;
     }
 
     .projects {
@@ -149,12 +154,7 @@ $conn->close();
         background-color: #f4f4f4;
     }
 
-    .message {
-        text-align: center;
-        color: #28a745;
-        font-weight: bold;
-        margin-top: 20px;
-    }
+   
 
     .notification {
         text-align: left;
@@ -167,10 +167,6 @@ $conn->close();
         border-radius: 4px;
         width: 500px;
         margin-bottom: 10px;
-    }
-
-    a {
-        color: red;
     }
 </style>
 

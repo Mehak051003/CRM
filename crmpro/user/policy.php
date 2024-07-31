@@ -17,6 +17,11 @@ $conn->close();
 <?php include 'header.php'; ?>
 
 <style>
+    .main-content{
+        margin-left: 120px;
+            margin-top: 60px;
+            padding: 20px;
+    }
     .policy-list {
         width: 80%;
         margin: auto;

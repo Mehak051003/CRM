@@ -32,15 +32,12 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Leave Requests</title>
     <style>
-    
         .main-content {
             max-width: 1200px;
             margin: 20px auto;
             padding: 20px;
             background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-left:220px;
         }
         table {
             width: 100%;
@@ -70,6 +67,10 @@ $conn->close();
             border-color: #f5c6cb;
             color: #721c24;
         }
+        #with{
+            color:black;
+            background-color:lightgreen;
+        }
     </style>
 </head>
 <body>
@@ -90,6 +91,7 @@ $conn->close();
                     <th>Project ID</th>
                     <th>TL Response</th>
                     <th>Created At</th>
+                    <th>Actions</th> <!-- New Actions column -->
                 </tr>
             </thead>
             <tbody>
@@ -105,6 +107,12 @@ $conn->close();
                         <td><?php echo $row['project_id']; ?></td>
                         <td><?php echo $row['tl_response']; ?></td>
                         <td><?php echo $row['created_at']; ?></td>
+                        <td>
+                            <form action="withdraw_leave.php" method="POST" onsubmit="return confirm('Are you sure you want to withdraw this leave request?');">
+                                <input type="hidden" name="leave_id" value="<?php echo $row['id']; ?>">
+                                <button type="submit" id="with">Withdraw</button>
+                            </form>
+                        </td>
                     </tr>
                 <?php endwhile; ?>
             </tbody>
@@ -138,4 +146,5 @@ $conn->close();
 
 </body>
 </html>
+
 <?php include 'footer.php'; ?>

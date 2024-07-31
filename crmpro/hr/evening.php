@@ -2,31 +2,30 @@
 session_start();
 include '../includes/db_connect.php';
 
-// Redirect to login page if user is not authenticated or not a User
-if (!isset($_SESSION['user']) || $_SESSION['role'] != 'User') {
+
+if (!isset($_SESSION['user']) || $_SESSION['role'] != 'hr') {
     header('Location: ../login.php');
     exit();
 }
 
-// Fetch user details based on session email
+
 $email = $_SESSION['user'];
-$stmt = $conn->prepare("SELECT id , report_send FROM users WHERE email = ?");
+$stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 $stmt->close();
 
-// Check if user exists
+
 if (!$user) {
-    // Handle case where user is not found
+    
     exit("User not found.");
 }
 
 $user_id = $user['id'];
-$report_send = $user['report_send'];
 
-// Fetch projects assigned to the user
+
 $query_projects = "
     SELECT p.*
     FROM project p
@@ -47,7 +46,7 @@ $stmt_projects->execute();
 $result_projects = $stmt_projects->get_result();
 $stmt_projects->close();
 
-// Check if the user has already submitted a report today
+
 $date_today = date('Y-m-d');
 $stmt_check_report = $conn->prepare("SELECT * FROM eveningreports WHERE user_id = ? AND DATE(report_date) = ?");
 $stmt_check_report->bind_param("is", $user_id, $date_today);
@@ -56,28 +55,24 @@ $result_check_report = $stmt_check_report->get_result();
 $report_exists = $result_check_report->num_rows > 0;
 $stmt_check_report->close();
 
-// Initialize message variable
+
 $message = '';
 
-// Initialize added records in session if not already set
+
 if (!isset($_SESSION['added_records_evening'])) {
     $_SESSION['added_records_evening'] = [];
 }
 
-// Process form submissions
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($report_send == 0) {
-        $message = "You have not sent the morning report, so you cannot send the evening report.";
-    } else {
     if (isset($_POST['add_record'])) {
-        // Adding record logic
+        
         $project_id = $_POST['project_id'];
         $task_type = $_POST['task_type'];
         $hours_worked = $_POST['hours_worked'];
         $task_list = $_POST['task_list'];
-        $status = $_POST['status'];
 
-        // Fetch project name based on project ID
+        
         $stmt_project_name = $conn->prepare("SELECT project_name FROM project WHERE id = ?");
         $stmt_project_name->bind_param("i", $project_id);
         $stmt_project_name->execute();
@@ -91,24 +86,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'project_name' => $project['project_name'],
             'task_type' => $task_type,
             'hours_worked' => $hours_worked,
-            'task_list' => $task_list,
-            'status' => $status
+            'task_list' => $task_list
         ];
 
-        // Add record to session
+        
         $_SESSION['added_records_evening'][] = $added_record;
 
         $message = "Record added successfully!";
     } elseif (isset($_POST['send_report'])) {
-        // Sending report logic
+        
         $time_in = $_POST['time_in'];
         $time_out = $_POST['time_out'];
         $location = $_POST['location'];
         $added_records = $_SESSION['added_records_evening'];
 
         foreach ($added_records as $record) {
-            $stmt = $conn->prepare("INSERT INTO eveningreports (user_id, project_id, task_type, hours_worked, task_list, status, time_in, time_out, location, report_date) VALUES (?, ?, ?, ?, ?,?, ?, ?, ?, NOW())");
-            $stmt->bind_param("iiissssss", $user_id, $record['project_id'], $record['task_type'], $record['hours_worked'], $record['task_list'], $record['status'],$time_in, $time_out, $location);
+            $stmt = $conn->prepare("INSERT INTO eveningreports (user_id, project_id, task_type, hours_worked, task_list, time_in, time_out, location, report_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+            $stmt->bind_param("iiisssss", $user_id, $record['project_id'], $record['task_type'], $record['hours_worked'], $record['task_list'], $time_in, $time_out, $location);
 
             if ($stmt->execute()) {
                 $message = "Report sent successfully!";
@@ -119,14 +113,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->close();
         }
 
-        // Clear added records after sending report
+        
         $_SESSION['added_records_evening'] = [];
 
-        // Redirect to prevent form resubmission
+        
         header('Location: evening.php');
         exit();
     }
-}
 }
 
 $conn->close();
@@ -242,20 +235,11 @@ button[type="submit"]:hover {
 .hidden {
     display: none;
 }
-
-#time_in,#time_out
-{
-    width: 80px;
-}
 </style>
 <div class="main-content">
     <?php if (!empty($message)) : ?>
         <div class="message"><?php echo $message; ?></div>
     <?php endif; ?>
-    
-    <?php if ($report_send == 0) : ?>
-        <div class="message">You have not sent the morning report, so you cannot send the evening report.</div>
-    <?php else : ?>
 
     <?php if ($report_exists) : ?>
         <div class="message">You have already sent your evening report for today.</div>
@@ -277,12 +261,11 @@ button[type="submit"]:hover {
                     <label for="task_type">Task Type:</label>
                     <select id="task_type" name="task_type" required>
                         <option value="">Select Task Type</option>
-                        <option value="analysis">Analysis</option>
+                        <option value="study">Study</option>
                         <option value="coding">Coding</option>
                         <option value="design">Design</option>
                         <option value="testing">Testing</option>
-                        <option value="bug">Bug Fixing</option>
-                        <!-- Add more task types as needed -->
+                        
                     </select>
                 </div>
 
@@ -296,16 +279,6 @@ button[type="submit"]:hover {
                     <textarea id="task_list" name="task_list" required></textarea>
                 </div>
 
-                <div class="form-group">
-                    <label for="status">Select Status:</label>
-                    <select id="status" name="status" required>
-                        <option value="">Select Status</option>
-                        <option value="online">Online</option>
-                        <option value="offline">Offline</option>
-                        <!-- Add more task types as needed -->
-                    </select>
-                </div>
-
                 <button type="submit" name="add_record">Add Record</button>
             </form>
         </div>
@@ -316,20 +289,18 @@ button[type="submit"]:hover {
                 <div class="form-group">
                     <label for="time_in">Time In:</label>
                     <input type="time" id="time_in" name="time_in" required>
-                    <small>Time in should not be greater than 12:00 PM</small>
                 </div>
 
                 <div class="form-group">
                     <label for="time_out">Time Out:</label>
                     <input type="time" id="time_out" name="time_out" required>
-                    <small>Time out should not be greater than 06:00 PM</small>
                 </div>
 
                 <div class="radio-group">
                     <input type="radio" id="office" name="location" value="office" required>
                     <label for="office">Work from Office</label>
                 </div>
-                <br>
+
                 <button type="submit" name="send_report">Send Report</button>
             </form>
         </div>
@@ -342,7 +313,6 @@ button[type="submit"]:hover {
                     <th>Task Type</th>
                     <th>Hours Worked</th>
                     <th>Task List</th>
-                    <th>Status</th>
                 </tr>
                 <?php foreach ($_SESSION['added_records_evening'] as $record) : ?>
                     <?php if (isset($record['user_id']) && $record['user_id'] == $user_id) : ?>
@@ -351,13 +321,11 @@ button[type="submit"]:hover {
                             <td><?php echo htmlspecialchars($record['task_type']); ?></td>
                             <td><?php echo htmlspecialchars($record['hours_worked']); ?></td>
                             <td><?php echo htmlspecialchars($record['task_list']); ?></td>
-                            <td><?php echo htmlspecialchars($record['status']); ?></td>
                         </tr>
                     <?php endif; ?>
                 <?php endforeach; ?>
             </table>
         </div>
-    <?php endif; ?>
     <?php endif; ?>
 </div>
 

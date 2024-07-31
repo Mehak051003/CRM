@@ -115,14 +115,15 @@ $conn->close();
     <title>Send Leave Request</title>
     <style>
         /* Add your CSS styles for form, messages, etc. here */
+
         .main-content {
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+           
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        
         }
         .form-group {
             margin-bottom: 20px;
@@ -151,6 +152,7 @@ $conn->close();
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            position: center;
         }
         button[type="submit"]:hover,
         button[type="reset"]:hover {

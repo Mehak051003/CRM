@@ -2,7 +2,7 @@
 session_start();
 include '../includes/db_connect.php';
 
-if (!isset($_SESSION['user']) || $_SESSION['role'] != 'admin') {
+if (!isset($_SESSION['user']) || $_SESSION['role'] != 'hr') {
     header('Location: ../login.php');
     exit();
 }

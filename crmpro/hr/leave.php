@@ -2,20 +2,16 @@
 session_start();
 include '../includes/db_connect.php';
 
-if (!isset($_SESSION['user']) || $_SESSION['role'] != 'Team Leader') {
+if (!isset($_SESSION['user']) || $_SESSION['role'] != 'hr') {
     header('Location: ../login.php');
     exit();
 }
-
-$team_leader_id = $_SESSION['user_id'];
 
 $stmt_leave_requests = $conn->prepare("
     SELECT lr.id, lr.user_id, u.name AS user_name, lr.start_date, lr.end_date, lr.leave_type, lr.duration, lr.purpose, lr.address_during_leave, lr.mobile_number, lr.project_id, lr.tl_response, lr.created_at
     FROM leave_requests lr
     JOIN users u ON lr.user_id = u.id
-    WHERE u.team_leader_id = ?
 ");
-$stmt_leave_requests->bind_param("i", $team_leader_id);
 $stmt_leave_requests->execute();
 $result_leave_requests = $stmt_leave_requests->get_result();
 $stmt_leave_requests->close();
@@ -51,7 +47,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leave Requests </title>
+    <title>Leave Requests</title>
     <style>
         .main-content {
             max-width: 1500px;
@@ -64,7 +60,6 @@ $conn->close();
             margin-left: 120px;
             margin-top: 60px;
             padding: 20px;
-    
         }
         table {
             width: 100%;
@@ -123,20 +118,20 @@ $conn->close();
         <tbody>
             <?php while ($row = $result_leave_requests->fetch_assoc()) : ?>
                 <tr>
-                    <td><?php echo $row['user_name']; ?></td>
-                    <td><?php echo $row['start_date']; ?></td>
-                    <td><?php echo $row['end_date']; ?></td>
+                    <td><?php echo htmlspecialchars($row['user_name']); ?></td>
+                    <td><?php echo htmlspecialchars($row['start_date']); ?></td>
+                    <td><?php echo htmlspecialchars($row['end_date']); ?></td>
                     <td><?php echo ($row['leave_type'] == 1) ? 'Full Day' : 'Half Day'; ?></td>
-                    <td><?php echo $row['duration']; ?></td>
-                    <td><?php echo $row['purpose']; ?></td>
-                    <td><?php echo $row['address_during_leave']; ?></td>
-                    <td><?php echo $row['mobile_number']; ?></td>
-                    <td><?php echo $row['project_id']; ?></td>
-                    <td><?php echo $row['created_at']; ?></td>
-                    <td><?php echo $row['tl_response']; ?></td>
+                    <td><?php echo htmlspecialchars($row['duration']); ?></td>
+                    <td><?php echo htmlspecialchars($row['purpose']); ?></td>
+                    <td><?php echo htmlspecialchars($row['address_during_leave']); ?></td>
+                    <td><?php echo htmlspecialchars($row['mobile_number']); ?></td>
+                    <td><?php echo htmlspecialchars($row['project_id']); ?></td>
+                    <td><?php echo htmlspecialchars($row['created_at']); ?></td>
+                    <td><?php echo htmlspecialchars($row['tl_response']); ?></td>
                     <td>
                         <form method="post">
-                            <input type="hidden" name="leave_id" value="<?php echo $row['id']; ?>">
+                            <input type="hidden" name="leave_id" value="<?php echo htmlspecialchars($row['id']); ?>">
                             <select name="response" <?php echo ($row['tl_response'] != 'Pending') ? 'disabled' : ''; ?>>
                                 <option value="Approved" <?php echo ($row['tl_response'] == 'Approved') ? 'selected' : ''; ?>>Approve</option>
                                 <option value="Rejected" <?php echo ($row['tl_response'] == 'Rejected') ? 'selected' : ''; ?>>Reject</option>

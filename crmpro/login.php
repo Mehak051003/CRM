@@ -27,6 +27,9 @@ if (isset($_POST['login'])) {
         else if($role == "Team Leader"){
             header('Location: teamleader/dashboard.php');
         }
+        else if($role == "hr"){
+            header('Location: hr/dashboard.php');
+        }
     } else {
         echo "<script>alert('Invalid credentials!');</script>";
     }
@@ -125,6 +128,7 @@ if (isset($_POST['login'])) {
                 <option value="admin">Admin</option>
                 <option value="User">User</option>
                 <option value="Team Leader">Team Leader</option>
+                <option value="hr">HR</option>
             </select>
             <button type="submit" name="login"><b>Login</b></button>
         </form>

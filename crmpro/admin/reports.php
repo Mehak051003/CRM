@@ -56,7 +56,7 @@ body {
 }
 
 .main-content {
-    max-width: 1200px;
+    max-width: 1500px;
     margin: 20px auto;
     padding: 20px;
     background-color: #fff;
@@ -102,10 +102,12 @@ button[type="submit"] {
     padding: 10px 20px;
     border-radius: 4px;
     cursor: pointer;
+    float:right;
 }
 
 button[type="submit"]:hover {
     background-color: #34495e;
+    
 }
 
 .table-container {
@@ -117,10 +119,12 @@ table {
     border-collapse: collapse;
 }
 
+
 th, td {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: left;
+    position:relative;
 }
 
 th {
@@ -158,10 +162,15 @@ button#morning-report:hover {
 button#evening-report:hover {
     background-color: #c0392b;
 }
+.main-content {
+            margin-left: 120px;
+            margin-top: 60px;
+            padding: 20px;
+        }
 </style>
 
 <div class="main-content">
-    <h2>Admin Reports</h2>
+    <h2>All Reports</h2>
 
     <div class="form-container">
         <form method="post" action="reports.php">
@@ -188,7 +197,7 @@ button#evening-report:hover {
             <button type="submit">Filter Reports</button>
         </form>
     </div>
-
+                        <br><br><br>
     <div class="table-container">
         <?php if ($result_reports->num_rows > 0) : ?>
             <table>

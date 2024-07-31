@@ -36,6 +36,11 @@ $conn->close();
         text-decoration: none;
         color: #3498db;
     }
+    .main-content{
+        margin-left: 120px;
+            margin-top: 60px;
+            padding: 20px;
+    }
 </style>
 
 <div class="policy-list">

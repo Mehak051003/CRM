@@ -1,8 +1,22 @@
-<!-- header.php -->
 <?php
-include '../includes/daily_reset.php'; // Include the daily reset script
+
+// session_start(); 
+
+include '../includes/daily_reset.php'; 
+include '../includes/db_connect.php'; 
+
+
+$user_id = $_SESSION['user_id']; 
+
+$query = $conn->prepare("SELECT image FROM users WHERE id = ?");
+$query->bind_param("i", $user_id);
+$query->execute();
+$result = $query->get_result();
+$user = $result->fetch_assoc();
+$image = $user['image']; 
+$query->close();
+
 ?>
-<!-- Rest of your header content -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -13,19 +27,83 @@ include '../includes/daily_reset.php'; // Include the daily reset script
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
             margin: 0;
             background-color: #ecf0f1;
+        }
+
+        .header {
+            width: 100%;
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 40px;
+        }
+
+        .header .logo {
+            font-size: 1.5em;
+        }
+
+        .header .profile {
+            position: relative;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .header .profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 130px;
+        }
+
+        .header .profile .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: #2c3e50;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            white-space: nowrap;
+            margin-right:50px;
+        }
+
+        .header .profile .dropdown a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+        }
+
+        .header .profile .dropdown a:hover {
+            background-color: #34495e;
+        }
+
+        .header .profile:hover .dropdown {
+            display: block;
         }
 
         .sidebar {
             width: 200px;
             background-color: #2c3e50;
             color: white;
-            display: flex;
-            flex-direction: column;
             padding: 20px;
-            height: 100vh;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            height: calc(100% - 60px);
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
         }
 
         .sidebar a {
@@ -34,21 +112,17 @@ include '../includes/daily_reset.php'; // Include the daily reset script
             margin: 10px 0;
             padding: 10px;
             border-radius: 4px;
+            display: block;
         }
 
         .sidebar a:hover {
             background-color: #34495e;
         }
 
-        .main-content {
-            flex-grow: 1;
-            padding: 20px;
-        }
-
         .sub-menu {
             display: none;
-            padding-left: 20px; 
-            background-color: #34495e; 
+            padding-left: 20px;
+            background-color: #34495e;
         }
 
         .sub-menu a {
@@ -61,11 +135,10 @@ include '../includes/daily_reset.php'; // Include the daily reset script
         .sub-menu a:hover {
             background-color: #2c3e50;
         }
-
         .menu {
             display: none;
-            padding-left: 20px; 
-            background-color: #34495e; 
+            padding-left: 20px;
+            background-color: #34495e;
         }
 
         .menu a {
@@ -86,8 +159,6 @@ include '../includes/daily_reset.php'; // Include the daily reset script
                 e.preventDefault();
                 $('.sub-menu').slideToggle();
             });
-        });
-        $(document).ready(function() {
             $('.leaves-toggle').click(function(e) {
                 e.preventDefault();
                 $('.menu').slideToggle();
@@ -96,20 +167,30 @@ include '../includes/daily_reset.php'; // Include the daily reset script
     </script>
 </head>
 <body>
-    <div class="sidebar">
-        <a href="dashboard.php">Dashboard</a>
-        <a class="reports-toggle" href="#">Reports</a>
-        <div class="sub-menu">
-            <a href="morning.php">Morning Status Report</a>
-            <a href="evening.php">Evening Status Report</a>
+<div class="header">
+    <div class="logo">User Panel</div>
+    <div class="profile">
+        <img src="../uploads/<?php echo htmlspecialchars($image); ?>" alt="Profile Picture">
+        <div class="dropdown">
+            <a href="myaccount.php">My Account</a>
+            <a href="editprofile.php">Edit Profile</a>
+            <a href="logout.php">Logout</a>
         </div>
-        <a class="leaves-toggle" href="#">Leaves</a>
-        <div class="menu">
-            <a href="sendleave.php">Send Leave Requests</a>
-            <a href="myleave.php">My Leave Requests</a>
-        </div>
-        <a href="policy.php">Policies</a>
-        <a href="holidays.php">Holidays</a>
-        <a href="logout.php">Logout</a>
     </div>
-    <div class="main-content">
+</div>
+<div class="sidebar">
+    <a href="dashboard.php">Dashboard</a>
+    <a class="reports-toggle" href="#">Reports</a>
+    <div class="sub-menu">
+        <a href="morning.php">Morning Status Report</a>
+        <a href="evening.php">Evening Status Report</a>
+    </div>
+    <a class="leaves-toggle" href="#">Leaves</a>
+    <div class="menu">
+        <a href="sendleave.php">Send Leave Requests</a>
+        <a href="myleave.php">My Leave Requests</a>
+    </div>
+    <a href="policy.php">Policies</a>
+    <a href="holidays.php">Holidays</a>
+</div>
+<div class="main-content">

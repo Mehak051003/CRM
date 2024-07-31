@@ -7,8 +7,24 @@ if (!isset($_SESSION['user']) || $_SESSION['role'] != 'Team Leader') {
     exit();
 }
 
-$query = "SELECT * FROM project";
-$result = $conn->query($query);
+$email = $_SESSION['user'];
+
+// Get the Team Leader ID from the session
+$stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+$team_leader_id = $user['id'];
+$stmt->close();
+
+// Query to get projects assigned to the Team Leader
+$query = "SELECT * FROM project WHERE team_leader_id = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $team_leader_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
 ?>
 
 <?php include 'header.php'; ?>
@@ -19,15 +35,18 @@ $result = $conn->query($query);
         flex-direction: column;
         align-items: center;
         margin: 20px auto;
-        width: 2900px;
+      
     }
 
     .main-content {
-        width: 2800px;
+        width: 2900px;
         background-color: #fff;
         padding: 20px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         border-radius: 8px;
+        margin-left: 120px;
+        margin-top: 60px;
+        padding: 20px;
     }
 
     table {

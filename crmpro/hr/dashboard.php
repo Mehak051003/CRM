@@ -2,7 +2,7 @@
 session_start();
 include '../includes/db_connect.php';  
 
-if (!isset($_SESSION['user']) || $_SESSION['role'] != 'User') {
+if (!isset($_SESSION['user']) || $_SESSION['role'] != 'hr') {
     header('Location: ../login.php');
     exit();
 }
@@ -32,26 +32,6 @@ if ($last_reset_date !== $current_date) {
 
 $name = isset($user['name']) ? htmlspecialchars($user['name']) : 'Name not found';
 $email = isset($user['email']) ? htmlspecialchars($user['email']) : 'Email not found';
-
-$query_projects = "
-    SELECT p.*
-    FROM project p
-    JOIN users u ON 
-        (u.id = p.project_manager_id OR
-         u.id = p.team_leader_id OR
-         u.id = p.developer_id OR
-         u.id = p.designer_id OR
-         u.id = p.qa_id OR
-         u.id = p.seo_id OR
-         u.id = p.sysadmin_id)
-    WHERE u.id = ?
-";
-
-$stmt_projects = $conn->prepare($query_projects);
-$stmt_projects->bind_param("i", $user_id);
-$stmt_projects->execute();
-$result_projects = $stmt_projects->get_result();
-$stmt_projects->close();
 
 $message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['timein'])) {
@@ -119,21 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['timein'])) {
     $stmt_check->close();
 }
 
-// Fetch approved leave requests
-$stmt_leave_requests = $conn->prepare("
-    SELECT start_date, end_date, purpose
-    FROM leave_requests
-    WHERE user_id = ? AND tl_response = 'Approved'
-    ORDER BY start_date DESC
-");
-$stmt_leave_requests->bind_param("i", $user_id);
-$stmt_leave_requests->execute();
-$result_leave_requests = $stmt_leave_requests->get_result();
-$approved_requests = [];
-while ($row = $result_leave_requests->fetch_assoc()) {
-    $approved_requests[] = $row;
-}
-$stmt_leave_requests->close();
+
 
 $conn->close();
 ?>
@@ -222,42 +188,13 @@ $conn->close();
         <p class="message"><?php echo $message; ?></p>
     <?php endif; ?>
 
-    <?php if (!empty($approved_requests)): ?>
-        <?php foreach ($approved_requests as $request): ?>
-            <?php if ($current_date <= $request['end_date']): ?>
-                <div class="notification">
-                    <?php echo "Your leave request from " . $request['start_date'] . " to " . $request['end_date'] . " for " . $request['purpose'] . " has been approved."; ?>
-                </div>
-            <?php endif; ?>
-        <?php endforeach; ?>
-    <?php endif; ?>
 
     <div class="user-info-box">
         <p><strong>Name:</strong> <?php echo htmlspecialchars($name); ?></p>
         <p><strong>Email:</strong> <?php echo htmlspecialchars($email); ?></p>
     </div>
 
-    <div class="projects">
-        <h2>Projects Assigned to You</h2>
-        <table border="1" cellpadding="10" cellspacing="0">
-            <tr>
-                <th>Serial Number</th>
-                <th>Project Name</th>
-                <th>Allocated Hours</th>
-                <th>Delivery Date</th>
-            </tr>
-            <?php
-            $serial_number = 1;
-            while ($row = $result_projects->fetch_assoc()) : ?>
-                <tr>
-                    <td><?php echo $serial_number++; ?></td>
-                    <td><?php echo htmlspecialchars($row['project_name']); ?></td>
-                    <td><?php echo htmlspecialchars($row['allocated_hours']); ?></td>
-                    <td><?php echo htmlspecialchars($row['qc_delivery_date']); ?></td>
-                </tr>
-            <?php endwhile; ?>
-        </table>
-    </div>
+
 </div>
 
 <?php include 'footer.php'; ?>
