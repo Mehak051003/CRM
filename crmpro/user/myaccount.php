@@ -20,8 +20,8 @@ $stmt->close();
 $name = isset($user['name']) ? htmlspecialchars($user['name']) : 'Name not found';
 $email = isset($user['email']) ? htmlspecialchars($user['email']) : 'Email not found';
 $role = isset($user['role']) ? htmlspecialchars($user['role']) : 'Role not found';
-$gender = isset($user['gender']) ? htmlspecialchars($user['gender']) : 'Gender not found';
 $designation = isset($user['designation']) ? htmlspecialchars($user['designation']) : 'Designation not found';
+$gender = isset($user['gender']) ? htmlspecialchars($user['gender']) : 'Gender not found';
 $dob = isset($user['dob']) ? htmlspecialchars($user['dob']) : 'DOB not found';
 $image = isset($user['image']) ? htmlspecialchars($user['image']) : 'default.jpg'; // Fallback image if none is found
 
@@ -48,7 +48,9 @@ $conn->close();
         width: 500px;
         max-width: 600px;
         text-align: center;
-        height: auto; /* Adjusted to fit content */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     .profile-image {
@@ -56,17 +58,37 @@ $conn->close();
         width: 150px;
         height: 150px;
         object-fit: cover;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
     }
 
-    .user-info p {
-        margin: 10px 0;
+    .user-info {
+        width: 100%;
+    }
+
+    .user-info table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+
+    .user-info th, .user-info td {
+        padding: 10px;
+        text-align: left;
+    }
+
+    .user-info th {
+        background-color: #2c3e50;
+        color: white;
         font-size: 16px;
     }
 
-    .user-info strong {
-        font-size: 18px;
-        margin-bottom: 5px;
+    .user-info td {
+        background-color: #f1f1f1;
+        font-size: 16px;
+    }
+
+    .user-info td:first-child {
+        border-right: 2px solid #2c3e50; /* Vertical line between columns */
     }
 
     .edit-button {
@@ -90,12 +112,36 @@ $conn->close();
     <div class="user-box">
         <img src="../uploads/<?php echo $image; ?>" alt="Profile Image" class="profile-image">
         <div class="user-info">
-            <p><strong>Name:</strong> <?php echo $name; ?></p>
-            <p><strong>Email:</strong> <?php echo $email; ?></p>
-            <p><strong>Role:</strong> <?php echo $role; ?></p>
-            <p><strong>Designation:</strong> <?php echo $designation; ?></p>
-            <p><strong>Gender:</strong> <?php echo $gender; ?></p>
-            <p><strong>Date of Birth:</strong> <?php echo $dob; ?></p>
+            <table>
+                <tr>
+                    <th>Field</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Name</td>
+                    <td><?php echo $name; ?></td>
+                </tr>
+                <tr>
+                    <td>Email</td>
+                    <td><?php echo $email; ?></td>
+                </tr>
+                <tr>
+                    <td>Role</td>
+                    <td><?php echo $role; ?></td>
+                </tr>
+                <tr>
+                    <td>Designation</td>
+                    <td><?php echo $designation; ?></td>
+                </tr>
+                <tr>
+                    <td>Gender</td>
+                    <td><?php echo $gender; ?></td>
+                </tr>
+                <tr>
+                    <td>Date of Birth</td>
+                    <td><?php echo $dob; ?></td>
+                </tr>
+            </table>
         </div>
         <a href="editprofile.php" class="edit-button">Edit Profile</a>
     </div>

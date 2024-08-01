@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../includes/db_connect.php';
+include '../timeout_check.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['role'] != 'hr') {
     header('Location: ../login.php');
@@ -9,6 +10,7 @@ if (!isset($_SESSION['user']) || $_SESSION['role'] != 'hr') {
 
 $message = '';
 
+// Handle add holiday
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_holiday'])) {
         $holiday_name = $_POST['holiday_name'];
@@ -42,9 +44,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $stmt->close();
     }
+
+    if (isset($_POST['update_holiday'])) {
+        $update_id = $_POST['update_id'];
+        $holiday_name = $_POST['holiday_name'];
+        $holiday_date = $_POST['holiday_date'];
+        $day_of_week = date('l', strtotime($holiday_date));
+        $message_text = $_POST['message'];
+
+        $stmt = $conn->prepare("UPDATE holidays SET holiday_name = ?, holiday_date = ?, day_of_week = ?, message = ? WHERE id = ?");
+        $stmt->bind_param("ssssi", $holiday_name, $holiday_date, $day_of_week, $message_text, $update_id);
+
+        if ($stmt->execute()) {
+            $message = "Holiday updated successfully!";
+        } else {
+            $message = "Error: " . $stmt->error;
+        }
+
+        $stmt->close();
+    }
 }
 
-$query = "SELECT id, holiday_name, holiday_date, day_of_week, message FROM holidays ORDER BY holiday_date ";
+$query = "SELECT id, holiday_name, holiday_date, day_of_week, message FROM holidays ORDER BY holiday_date";
 $result = $conn->query($query);
 $holidays = [];
 if ($result->num_rows > 0) {
@@ -143,6 +164,19 @@ $conn->close();
         .delete-button:hover {
             background-color: #c0392b;
         }
+
+        .edit-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .edit-button:hover {
+            background-color: #2980b9;
+        }
     </style>
     <script>
         function confirmDelete() {
@@ -181,12 +215,13 @@ $conn->close();
             <tbody>
                 <?php foreach ($holidays as $holiday) : ?>
                     <tr>
-                        <td><?php echo $holiday['holiday_name']; ?></td>
-                        <td><?php echo $holiday['holiday_date']; ?></td>
-                        <td><?php echo $holiday['day_of_week']; ?></td>
-                        <td><?php echo $holiday['message']; ?></td>
+                        <td><?php echo htmlspecialchars($holiday['holiday_name']); ?></td>
+                        <td><?php echo htmlspecialchars($holiday['holiday_date']); ?></td>
+                        <td><?php echo htmlspecialchars($holiday['day_of_week']); ?></td>
+                        <td><?php echo htmlspecialchars($holiday['message']); ?></td>
                         <td>
-                            <form method="post" action="holidays.php" onsubmit="return confirmDelete();">
+                            <button class="edit-button" onclick="openEditForm(<?php echo $holiday['id']; ?>, '<?php echo htmlspecialchars($holiday['holiday_name']); ?>', '<?php echo htmlspecialchars($holiday['holiday_date']); ?>', '<?php echo htmlspecialchars($holiday['message']); ?>')">Edit</button>
+                            <form method="post" action="holidays.php" style="display:inline;" onsubmit="return confirmDelete();">
                                 <input type="hidden" name="delete_id" value="<?php echo $holiday['id']; ?>">
                                 <button type="submit" class="delete-button">Delete</button>
                             </form>
@@ -196,6 +231,36 @@ $conn->close();
             </tbody>
         </table>
     </div>
+
+    <!-- Edit Holiday Modal -->
+    <div id="editModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:lightblue; padding:40px; border:1px solid #ddd; box-shadow:0 0 15px rgba(0,0,0,0.2); z-index:1000; width: 80%; max-width: 800px; height: auto; min-height: 300px;">
+        <h2>Edit Holiday</h2>
+        <form action="holidays.php" method="post">
+            <input type="hidden" name="update_id" id="update_id">
+            <label for="holiday_name">Holiday Name:</label>
+            <input type="text" name="holiday_name" id="edit_holiday_name" required>
+            <label for="holiday_date">Date:</label>
+            <input type="date" name="holiday_date" id="edit_holiday_date" required>
+            <label for="message">Message:</label>
+            <textarea name="message" id="edit_message" rows="4"></textarea>
+            <input type="submit" name="update_holiday" value="Update Holiday">
+            <button type="button" onclick="closeEditForm()">Cancel</button>
+        </form>
+    </div>
+
+    <script>
+        function openEditForm(id, name, date, message) {
+            document.getElementById('update_id').value = id;
+            document.getElementById('edit_holiday_name').value = name;
+            document.getElementById('edit_holiday_date').value = date;
+            document.getElementById('edit_message').value = message;
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function closeEditForm() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
 

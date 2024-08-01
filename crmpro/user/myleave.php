@@ -89,7 +89,7 @@ $conn->close();
                     <th>Address during Leave</th>
                     <th>Mobile Number</th>
                     <th>Project ID</th>
-                    <th>TL Response</th>
+                    <th>Response</th>
                     <th>Created At</th>
                     <th>Actions</th> <!-- New Actions column -->
                 </tr>

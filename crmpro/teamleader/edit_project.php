@@ -1,6 +1,7 @@
 <?php
 session_start();
 include '../includes/db_connect.php';
+include '../timeout_check.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['role'] != 'Team Leader') {
     header('Location: ../login.php');

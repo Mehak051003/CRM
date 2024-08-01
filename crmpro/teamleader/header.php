@@ -1,4 +1,3 @@
-<!-- header.php -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -148,7 +147,7 @@
 <div class="header">
         <div class="logo">TL Panel</div>
         <div class="profile">
-            <img src="../path/to/profile/image.jpg" alt="Profile Picture">
+        <img src="../uploads/i1.jpeg" alt="Profile Picture">
             <div class="dropdown">
                 <a href="myaccount.php">My Account</a>
                 <a href="editprofile.php">Edit Profile</a>

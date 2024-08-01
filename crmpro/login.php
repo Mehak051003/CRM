@@ -5,10 +5,9 @@ include 'includes/db_connect.php';
 if (isset($_POST['login'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
-    $role = $_POST['role'];
-    
-    $stmt = $conn->prepare("SELECT id, email, role FROM users WHERE email = ? AND password = ? AND role = ?");
-    $stmt->bind_param("sss", $email, $password, $role);
+
+    $stmt = $conn->prepare("SELECT id, email, role FROM users WHERE email = ? AND password = ?");
+    $stmt->bind_param("ss", $email, $password);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -16,20 +15,29 @@ if (isset($_POST['login'])) {
         $user = $result->fetch_assoc();
         $_SESSION['user'] = $user['email'];
         $_SESSION['role'] = $user['role'];
-        $_SESSION['user_id'] = $user['id']; 
+        $_SESSION['user_id'] = $user['id'];
 
-        if($role == "admin"){
-            header('Location: admin/dashboard.php');
+        $_SESSION['last_activity'] = time();
+
+        // Redirect based on role
+        switch ($user['role']) {
+            case 'admin':
+                header('Location: admin/dashboard.php');
+                break;
+            case 'User':
+                header('Location: user/dashboard.php');
+                break;
+            case 'Team Leader':
+                header('Location: teamleader/dashboard.php');
+                break;
+            case 'hr':
+                header('Location: hr/dashboard.php');
+                break;
+            default:
+                echo "<script>alert('Unknown role!');</script>";
+                break;
         }
-        else if($role == "User"){
-            header('Location: user/dashboard.php');
-        }
-        else if($role == "Team Leader"){
-            header('Location: teamleader/dashboard.php');
-        }
-        else if($role == "hr"){
-            header('Location: hr/dashboard.php');
-        }
+        exit();
     } else {
         echo "<script>alert('Invalid credentials!');</script>";
     }
@@ -37,6 +45,7 @@ if (isset($_POST['login'])) {
     $conn->close();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -62,7 +71,7 @@ if (isset($_POST['login'])) {
             left: 500px;
             font-size: 50px;
             max-width: 500px;
-            color:black;
+            color: black;
         }
 
         .login-container {
@@ -87,8 +96,7 @@ if (isset($_POST['login'])) {
         }
 
         .login-container input[type="email"],
-        .login-container input[type="password"],
-        .login-container select {
+        .login-container input[type="password"] {
             width: 90%;
             padding: 10px;
             margin: 10px 0;
@@ -122,14 +130,7 @@ if (isset($_POST['login'])) {
             <input type="email" name="email" required>
             <label for="password">Password:</label>
             <input type="password" name="password" required>
-            <label for="role">Role:</label>
-            <select name="role" required>
-                <option value="">Select Role</option>
-                <option value="admin">Admin</option>
-                <option value="User">User</option>
-                <option value="Team Leader">Team Leader</option>
-                <option value="hr">HR</option>
-            </select>
+            <br><br>
             <button type="submit" name="login"><b>Login</b></button>
         </form>
     </div>
